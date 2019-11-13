@@ -5,12 +5,31 @@
 using namespace std;
 
 bool CppTrue_CFalse = true;
+string mainF = "main0"; // main0 for tests, main for real.
 string type = "";
 string nameFunction = "";
 string nameFile = "";
 string parameters = "";
 string parametersDefValues = "";
-bool mustDefaultValue = false; // If one, in C++, you must have all the next! So starting with the last one!
+// bool mustDefaultValue = false; // If one, in C++, you must have all the next! So starting with the last one!
+// if cpb, update cpb.
+
+string deleteDefValues ( string parameters = "" ) {
+    string result = "";
+    bool add = true;
+    for ( int a=0; a<parameters.size(); a++ ) {
+        if ( parameters[a] == '=' ) {
+add = false;
+        } else if (parameters[a] == ',') {
+add = true;
+        }
+        if (add == true){
+result = result + parameters[a];
+        }
+    }
+    return result;
+}
+
 
 bool doesFileExists ( const std::string& name ) { // https://stackoverflow.com/questions/46292764/check-for-file-existence-in-c-without-creating-file
     if ( FILE *file = fopen ( name.c_str(), "r" ) ) {
@@ -22,14 +41,14 @@ bool doesFileExists ( const std::string& name ) { // https://stackoverflow.com/q
 }
 
 bool updateC_CPP() { // File detection.
-    if ( doesFileExists ( "main.c" ) == true ) {
+    if ( doesFileExists ( mainF + ".c" ) == true ) {
         CppTrue_CFalse = false;
-        cout << "\"main.c\" found. Working on it." << endl;
-    } else if ( doesFileExists ( "main.cpp" ) ==true ) {
+        cout << "\"" << mainF << ".c\" found. Working on it." << endl;
+          } else if ( doesFileExists (  mainF + ".cpp" ) ==true ) {
         CppTrue_CFalse = true;
-        cout << "\"main.cpp\" found. Working on it." << endl;
+        cout << "\"" << mainF << ".cpp\" found. Working on it." << endl;
     } else {
-        cerr << "Neither \"main.c\" nor \"main.cpp\" found!" << endl;
+        cerr << "Neither \"" << mainF << ".c\" nor \"" << mainF << ".cpp\" found!" << endl;
         exit ( EXIT_FAILURE );
     }
     return CppTrue_CFalse;
@@ -39,35 +58,36 @@ void intro() {
     cout << "This program will help You to add a function with a H file (header)." << endl;
 }
 
-string askParamDefVal(){
- cout << "Same, but _with default value_ (For example \"int a = 0, bool b = true, string HW = "" ... \")\n";
-        getline ( cin, parametersDefValues );
-    return parametersDefValues ;
-    }
 
 void askInformations() {
     cout << "What is the type of the new function? (For example void, int, bool...) ";
     getline ( cin, type );
     cout << "What is the name of the new function? (For example add, test1...) ";
     getline ( cin, nameFunction );
-    cout << "What is the name of the _new_ file? (For example operations, AllTests...) ";
-    cout << "(Nothing for same name as the function.) " << endl;
+    cout << "What is the name of the _new_ file? (For example operations, AllTests...) "; // if old file: Update!!!!!!!!!!
+    cout << "(Nothing for same name as the function.) ";
     getline ( cin, nameFile );
     if ( nameFile=="" ) {
         nameFile = nameFunction;
     }
-    cout << nameFile << ".c";
+    cout << "\"" << nameFile << ".c";
     if ( CppTrue_CFalse==true ) {
         cout << "pp" ;
     }
-    cout << " " << " and " << nameFile << ".h" << endl;
-    cout << "What are the potential type and parameters of the function (separated with a \",\", _without default value_) (For example \"int a, bool b, string HW ...\" ) ";
-    if ( CppTrue_CFalse==true ) {
-        cout << "Parameters with optional default value at the end." << endl;
+    cout << "\" and " << nameFile << ".h\" will be made." << endl;
+    cout << "What are the potential type and parameters of the function (separated with a \",\" ";
+      if ( CppTrue_CFalse==false )
+      {
+
+        cout << "_without default value._ \nThere is no default value in C.) \n(For example \"int a, bool b, string HW ...\" ) ";
+      }
+    else  {
+        cout << "with optional default value at the end. \n(For example \"int a = 0, bool b = true, string HW = "" ... \") ";
     }
-    getline ( cin, parameters );
-    if ( CppTrue_CFalse==true ) {
-    parametersDefValues  = askParamDefVal();
+    getline ( cin, parametersDefValues );
+    parameters = deleteDefValues(parametersDefValues);
+    if ( CppTrue_CFalse==false ) {
+parametersDefValues = parameters; // There is no default value in C.
     }
 }
 
@@ -76,7 +96,7 @@ void askInformations() {
 
 void YouMustDo() { // Ok.
     cout << "My job is done. Now, _You_ must work." << endl;
-    cout << "You must update \"main.c" ;
+    cout << "You must update \"" << mainF << ".c" ; // Auto insert string in file.
     if ( CppTrue_CFalse==true ) {
         cout << "pp";
     }
@@ -180,10 +200,6 @@ int diff(int a_local_diff, int b_local_diff)
 
         monFlux2.close();
     }
-
-
-
-
     YouMustDo();
     getline(cin, file); // Enter to quit?
     return 0;

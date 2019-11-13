@@ -39,6 +39,12 @@ void intro() {
     cout << "This program will help You to add a function with a H file (header)." << endl;
 }
 
+string askParamDefVal(){
+ cout << "Same, but _with default value_ (For example \"int a = 0, bool b = true, string HW = "" ... \")\n";
+        getline ( cin, parametersDefValues );
+    return parametersDefValues ;
+    }
+
 void askInformations() {
     cout << "What is the type of the new function? (For example void, int, bool...) ";
     getline ( cin, type );
@@ -61,10 +67,12 @@ void askInformations() {
     }
     getline ( cin, parameters );
     if ( CppTrue_CFalse==true ) {
-        cout << "Same, but _with default value_ (For example \"int a = 0, bool b = true, string HW = "" ... \")";
-        getline ( cin, parametersDefValues );
+    parametersDefValues  = askParamDefVal();
     }
 }
+
+
+
 
 void YouMustDo() { // Ok.
     cout << "My job is done. Now, _You_ must work." << endl;
@@ -130,35 +138,33 @@ int main() {
     } else {
         monFlux << "#ifndef " << toUp(nameFile) << "_H_INCLUDED" << endl;
         monFlux << "#define " << toUp(nameFile) << "_H_INCLUDED" << endl << endl;
-        monFlux << type << " " << nameFunction << "(" << parametersDefValues << ") << endl << endl;"
+        monFlux << type << " " << nameFunction << "(" << parametersDefValues << ");" << endl << endl;
 // int add(int a_local_add = 0, int b_local_add = 0);
 // int diff(int a_local_diff = 0, int b_local_diff = 0);
         monFlux << "#endif //" << toUp(nameFile) << "_H_INCLUDED";
-        monFlux.close();
-    }
 
-    string file = nameFile + ".c";
-    if ( CppTrue_CFalse==true ) {
-        file + "pp" ;
     }
-    ofstream monFlux ( file.c_str(), ios::app );
-    if ( !monFlux ) {
+       monFlux.close();
+file = nameFile + ".c";
+    if ( CppTrue_CFalse==true ) {
+file = file + "pp" ;
+    }
+    ofstream monFlux2 ( file.c_str(), ios::app );
+    if ( !monFlux2 ) {
         cerr << "ERROR: Impossible to open the file ";
         ierr ( file );
         cerr << " in append mode!" << endl;
         return 1;
     } else {
-        monFlux << "#include \"" << nameFile << ".h\"" << endl;
-        monFlux << type << " " << nameFunction << "(" << parameters << "){" << endl;
-monFlux << "// ..." << endl;
+        monFlux2 << "#include \"" << nameFile << ".h\"" << endl;
+        monFlux2 << type << " " << nameFunction << "(" << parameters << "){" << endl;
+monFlux2 << "// ..." << endl;
 
 if (type != "void")
 {
-    monFlux << "return ... ;" << endl;
-
+    monFlux2 << "return ... ;" << endl;
 }
-
-monFlux << "}" << endl;
+monFlux2 << "}" << endl;
 
         /*
         int add(int a_local_add, int b_local_add)
@@ -172,13 +178,13 @@ int diff(int a_local_diff, int b_local_diff)
 }
         */
 
-        monFlux.close();
+        monFlux2.close();
     }
 
 
 
 
     YouMustDo();
-    // Enter to quit?
+    getline(cin, file); // Enter to quit?
     return 0;
 }

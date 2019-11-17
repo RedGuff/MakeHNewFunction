@@ -1,2 +1,2 @@
 # MakeHNewFunction
-Make automatically header ad files for new functions for C and C++.
+Make automatically header and files for new functions for C and C++.

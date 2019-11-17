@@ -4,32 +4,60 @@
 
 using namespace std;
 
-bool CppTrue_CFalse = true;
-string mainF = "main0"; // main0 for tests, main for real.
-string type = "";
-string nameFunction = "";
+
+string mainF = "main"; // main0 for tests, main for real.
 string nameFile = "";
 string parameters = "";
 string parametersDefValues = "";
-// bool mustDefaultValue = false; // If one, in C++, you must have all the next! So starting with the last one!
+string exampleFunctionCPP = "";
+string pp = "";
 // if cpb, update cpb.
 
-string deleteDefValues ( string parameters = "" ) {
+string deleteDefValues ( string parameters = "" ) { // Tests Ok.
+    int parenthesis = 0;
+    // Entrer dans une string est facilement détectable, mais pas sa sortie.
+    bool inAString = false; // "," in a string or in a char. // Impossible to have "," or "=" in a name!
+    char charJustBefore = ' ';
     string result = "";
     bool add = true;
     for ( int a=0; a<parameters.size(); a++ ) {
-        if ( parameters[a] == '=' ) {
-add = false;
-        } else if (parameters[a] == ',') {
-add = true;
+        if (( parameters[a] == '=' ) && ( inAString == false ) ) {
+            add = false;
+        } else if ( ( parameters[a] == ',' ) && ( inAString == false ) ) {
+            add = true;
+        } else if (( charJustBefore != '\\' ) && (( parameters[a] == '"' ) || ( parameters[a] == '\'' ) )) {
+            inAString = !inAString;
         }
-        if (add == true){
-result = result + parameters[a];
+        if ( add == true ) {
+            result = result + parameters[a];
+        if (parameters[a]=='(')
+        {
+            parenthesis++;
         }
+        if (parameters[a]==')')
+        {
+            parenthesis--;
+        }
+
+        }
+       charJustBefore = parameters[a];
     }
+    if (parenthesis<0)
+    {
+        cerr << "Bad function! I miss " << -parenthesis << " \"(\" in the result!"<< endl;
+    }
+    while (parenthesis>0)
+    {
+        parenthesis--;
+        result = result + ")"; // Some can be deleted.
+    }
+
     return result;
 }
 
+void intro() { // Tests Ok.
+    cout << "   This program will help You to add a function with external files: a H file (header)..." << endl;
+}
 
 bool doesFileExists ( const std::string& name ) { // https://stackoverflow.com/questions/46292764/check-for-file-existence-in-c-without-creating-file
     if ( FILE *file = fopen ( name.c_str(), "r" ) ) {
@@ -40,71 +68,135 @@ bool doesFileExists ( const std::string& name ) { // https://stackoverflow.com/q
     }
 }
 
-bool updateC_CPP() { // File detection.
+void updateC_CPP() { // File detection. // Tests Ok.
     if ( doesFileExists ( mainF + ".c" ) == true ) {
-        CppTrue_CFalse = false;
+        pp=""; // No change.
         cout << "\"" << mainF << ".c\" found. Working on it." << endl;
           } else if ( doesFileExists (  mainF + ".cpp" ) ==true ) {
-        CppTrue_CFalse = true;
+        pp = "pp";
         cout << "\"" << mainF << ".cpp\" found. Working on it." << endl;
     } else {
-        cerr << "Neither \"" << mainF << ".c\" nor \"" << mainF << ".cpp\" found!" << endl;
+        cerr << "ERROR: Neither \"" << mainF << ".c\" nor \"" << mainF << ".cpp\" found!" << endl;
         exit ( EXIT_FAILURE );
     }
-    return CppTrue_CFalse;
 }
 
-void intro() {
-    cout << "This program will help You to add a function with a H file (header)." << endl;
+string DelLeftSpacesTabs ( string In = "" ) { // Tests Ok.
+// "" ? // Tests ok, no need.
+    while (( In[0]==' ') || (In[0]=='\t') ) {
+        In=In.substr ( 1 );
+    }
+    return In;
 }
 
-
-void askInformations() {
-    cout << "What is the type of the new function? (For example void, int, bool...) ";
-    getline ( cin, type );
-    cout << "What is the name of the new function? (For example add, test1...) ";
-    getline ( cin, nameFunction );
-    cout << "What is the name of the _new_ file? (For example operations, AllTests...) "; // if old file: Update!!!!!!!!!!
-    cout << "(Nothing for same name as the function.) ";
+void askInformations1() { //
+    exampleFunctionCPP = "void f(int a = 0, char b = 'z', char c = '\\\'', string d = \"Yes\", string compliment = \"she\\'s intelligent.\", string insult = \"He is \\\"special\\\"...\")";
+    cout << "You can have several functions in a file. \nFor example \"AllTests.h\" and  \"AllTests.c" ;
+    cout << pp ;
+    cout << "\" can have \"bool test1()\" and \"bool test2()\" functions." << endl;
+    cout << "What is the name of the _new_ file, without extention? "; // if old file: Update TODO!!!!!!!!!!
     getline ( cin, nameFile );
-    if ( nameFile=="" ) {
-        nameFile = nameFunction;
-    }
-    cout << "\"" << nameFile << ".c";
-    if ( CppTrue_CFalse==true ) {
-        cout << "pp" ;
-    }
-    cout << "\" and " << nameFile << ".h\" will be made." << endl;
-    cout << "What are the potential type and parameters of the function (separated with a \",\" ";
-      if ( CppTrue_CFalse==false )
+    nameFile = DelLeftSpacesTabs(nameFile);
+    cout << "\"" << nameFile << ".c" << pp << "\" and " << nameFile << ".h\" will be made." << endl;
+}
+void askInformations2() {
+    cout << "What is the type and the function, with the potential type and parameters ";
+      if ( pp=="" )
       {
-
-        cout << "_without default value._ \nThere is no default value in C.) \n(For example \"int a, bool b, string HW ...\" ) ";
+        cout << "_without_ default value? (There is no default value in C.) \n";
+     cout << "For example: " << deleteDefValues(exampleFunctionCPP) << endl;
       }
     else  {
-        cout << "with optional default value at the end. \n(For example \"int a = 0, bool b = true, string HW = "" ... \") ";
+        cout << "with optional default value at the end. \n";
+     cout << "For example: " << exampleFunctionCPP << endl;
     }
     getline ( cin, parametersDefValues );
+parametersDefValues = DelLeftSpacesTabs(parametersDefValues);
     parameters = deleteDefValues(parametersDefValues);
-    if ( CppTrue_CFalse==false ) {
+    if ( pp=="" ) {
 parametersDefValues = parameters; // There is no default value in C.
     }
 }
 
+void Rename(string FileIn = "", string FileOut = ""){
+       ifstream fileI ( FileIn.c_str(), ios::in ); // Read
+    if ( !fileI )
+        {
+        cerr << "Impossible to open " << FileIn << "!" << endl;
+        }
+                else
+            {
+    ofstream fileO ( FileOut.c_str()); // Delete and append. ?
+    if ( !fileO )
+        {
+        cerr << "Impossible to open " << FileOut << "!" << endl;
+        }
+    else
+        {
+            string line = "";
+            while ( getline ( fileI, line ) )
+                {
+                fileO << line << endl; // append file.
+                }
+            }
+        fileO.close();
+        fileI.close();
+        }
+//   return 0;
+}
+
+int insertStringBeginningFile(string data = "", string FileIn = "", string FileOut = ""){ // Insert a string at the beginning of the file. AS the names says: data first, file after.
+bool insertionDone = false;
+
+       ifstream fileI ( FileIn.c_str(), ios::in ); // Open to read.
+    if ( !fileI )
+        {
+        cerr << "Impossible to open " << FileIn << "!" << endl;
+        }
+                else
+            {
+    //ofstream fileO ( FileOut.c_str(), ios::app ); // Open to append.
+    ofstream fileO ( FileOut.c_str()); // Del and Open to append.
+    if ( !fileO )
+        {
+        cerr << "Impossible to open " << FileOut << "!" << endl;
+        }
+    else
+        {
+            string line = "";
+            while ( getline ( fileI, line ) )
+                {
+if (insertionDone == false)
+{
+       fileO << data ; // append file.
+       insertionDone = true;
+}
+                fileO << line << endl; // append file.
+                }
+            }
+        fileO.close();
+        fileI.close();
+        }
+   return 0;
+}
+
+void InsertStringBeginningFile (string stringtoInsert, string fileToInsert){
+string tempFile = "main.bak";
+Rename(fileToInsert, tempFile);
+insertStringBeginningFile(stringtoInsert, tempFile, fileToInsert);
+}
 
 
+void updateMain(){
+    string stringtoInsert = "#include \"" + nameFile + ".h\"" +"\n";
+    string fileToInsert = mainF + ".c" + pp;
+InsertStringBeginningFile (stringtoInsert, fileToInsert);
+}
 
 void YouMustDo() { // Ok.
     cout << "My job is done. Now, _You_ must work." << endl;
-    cout << "You must update \"" << mainF << ".c" ; // Auto insert string in file.
-    if ( CppTrue_CFalse==true ) {
-        cout << "pp";
-    }
-    cout << "\" with, at the beginning:" << endl;
-    cout << "#include \"" ;
-    cout << nameFile ;
-    cout << ".h\"" << endl;
-    cout << "Then, You must write the function." << endl;
+updateMain();
+    cout << "You must write the function inside " << nameFile << ".c" << pp << endl;
     cout << "Then, You can use the function." << endl;
     cout << "Bye!" << endl;
 }
@@ -122,7 +214,6 @@ void iout ( string message = "",  int colorisationFin = 0, int colorisation1 = 1
     cout << message;  // http://www.cplusplus.com/forum/beginner/108474/
     printf ( "\033[%dm", colorisationFin );
 }
-
 void ierr ( string message = "",  int colorisationFin = 0, int colorisation1 = 1, int colorisation2 = 31 ) { // Ok.
     // 31 = RED.
     // 1 = bold.
@@ -136,7 +227,6 @@ void ierr ( string message = "",  int colorisationFin = 0, int colorisation1 = 1
     cerr << message;  // http://www.cplusplus.com/forum/beginner/108474/
     printf ( "\033[%dm", colorisationFin );
 }
-
 string toUp ( string a = "" ) { // OK. // https://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
     for ( unsigned int i = 0; i < a.length(); i++ ) {
         a[i] = toupper ( a[i] );
@@ -144,10 +234,17 @@ string toUp ( string a = "" ) { // OK. // https://stackoverflow.com/questions/11
     return a;
 }
 
+void updateCPB(){
+// quel fichier de quel dossier ?
+string fileCPB = "file.CPB" ;
+cout << "You must update " << fileCPB <<"!"<< endl;
+}
+
 int main() {
     intro();
-    CppTrue_CFalse = updateC_CPP();
-    askInformations();
+    updateC_CPP();
+    askInformations1(); // Files.
+    askInformations2(); // Functions.
     string file = nameFile + ".h";
     ofstream monFlux ( file.c_str(), ios::app );
     if ( !monFlux ) {
@@ -158,29 +255,24 @@ int main() {
     } else {
         monFlux << "#ifndef " << toUp(nameFile) << "_H_INCLUDED" << endl;
         monFlux << "#define " << toUp(nameFile) << "_H_INCLUDED" << endl << endl;
-        monFlux << type << " " << nameFunction << "(" << parametersDefValues << ");" << endl << endl;
+        monFlux << parametersDefValues << ";"<< endl << endl;
 // int add(int a_local_add = 0, int b_local_add = 0);
 // int diff(int a_local_diff = 0, int b_local_diff = 0);
         monFlux << "#endif //" << toUp(nameFile) << "_H_INCLUDED";
-
     }
        monFlux.close();
-file = nameFile + ".c";
-    if ( CppTrue_CFalse==true ) {
-file = file + "pp" ;
-    }
-    ofstream monFlux2 ( file.c_str(), ios::app );
+file = nameFile + ".c" + pp ;
+        ofstream monFlux2 ( file.c_str(), ios::app );
     if ( !monFlux2 ) {
         cerr << "ERROR: Impossible to open the file ";
         ierr ( file );
         cerr << " in append mode!" << endl;
         return 1;
     } else {
-        monFlux2 << "#include \"" << nameFile << ".h\"" << endl;
-        monFlux2 << type << " " << nameFunction << "(" << parameters << "){" << endl;
+        monFlux2 << "#include \"" << nameFile << ".h\"" << endl << endl;
+        monFlux2 <<  parameters << "{" << endl;
 monFlux2 << "// ..." << endl;
-
-if (type != "void")
+if (parameters.substr(0,4) != "void") // Spaces and tabulations are deleted the beginning.
 {
     monFlux2 << "return ... ;" << endl;
 }
@@ -197,9 +289,9 @@ int diff(int a_local_diff, int b_local_diff)
     return a_local_diff - b_local_diff;
 }
         */
-
         monFlux2.close();
     }
+    updateCPB();
     YouMustDo();
     getline(cin, file); // Enter to quit?
     return 0;

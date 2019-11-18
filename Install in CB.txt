@@ -1,6 +1,10 @@
 To install this software in Code::Blocks, first download the zip file of the software and unzip in on your SSD (or hard drive).
 Then open Code::Blocks and click on the menu "Tools", the "Configure tools", "Add". A folder will appear: choose the ".exe" in the folder you've just unzipped.
+Parameters: add "${PROJECT_FILENAME}".
+Working direcory: add "${PROJECT_DIR}".
 Click "Ok", then "Close".
+Compil it with "Release" option, if it's not done.
+
 Very important: check it with a dummy "Hello world" function!
 Explain me your problems.
 Enjoy!

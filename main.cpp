@@ -1,16 +1,19 @@
+
 #include <iostream>
 #include <fstream>
 #include <string>
 
 using namespace std;
 
+OverwriteBakWihoutPrompt = true; // INI file?
 string mainF = "main"; // main0 for tests, main for real.
 string nameFile = "";
 string parameters = "";
 string parametersDefValues = "";
 string exampleFunctionCPP = "";
 string pp = ""; // "" for C, pp for C++.
-string fileCPB = "file.CPB" ;
+string fileCBP = "file.cbp" ;
+bool fileHCPPExists = false;
 
 
 void iout ( string message = "",  int colorisationFin = 0, int colorisation1 = 1, int colorisation2 = 31 ) { // Ok.
@@ -132,6 +135,8 @@ void askFile() { //
     cout << "You can have several functions in a file. \nFor example \"AllTests.h\" and \"AllTests.c" ;
     cout << pp ;
     cout << "\" can have \"bool test1()\" and \"bool test2()\" functions." << endl;
+    cout << "(I can\'t do it for You, today, but I hope I\'ll be able to do it, one day!)" << endl;
+
     cout << "What is the name of the _new_ file, without extention? "; // if old file: Update TODO!!!!!!!!!!
     getline ( cin, nameFile );
     nameFile = DelLeftSpacesTabs ( nameFile );
@@ -143,7 +148,8 @@ void askFile() { //
   //  clog << "(doesFileExists(nameFileH): " << doesFileExists ( nameFileH ) << endl;
 
     if ( ( doesFileExists ( nameFileCPP ) ) || ( doesFileExists ( nameFileH ) ) ) {
-        cerr << "\"" << nameFileCPP << "\" or/and " << nameFileH << " detected !" << endl;
+        fileHCPPExists = true;
+        cerr << "\"" << nameFileCPP << "\" or/and \"" << nameFileH << "\" detected !" << endl;
         cout << "I can\'t work with existing files, today, but I hope that I may do it, one day." << endl;
         cout << "ENTER to quit." << endl;
        getline(cin,mainF);
@@ -173,9 +179,25 @@ void askFunction() {
     }
 }
 
-void Rename ( string FileIn = "", string FileOut = "" ) {
-    ifstream fileI ( FileIn.c_str(), ios::in ); // Read
 
+void copyFile ( string FileIn = "", string FileOut = "", bool OverwriteWithoutPrompt = false ) {
+    ifstream fileI ( FileIn.c_str(), ios::in ); // Read
+testExist:
+    if ((!OverwriteWithoutPrompt) && (doesFileExists(FileOut)==true))
+    {
+        cout << "The file \"" << FileOut << "\" exists!" << endl;
+    cout << "Try a new name, or ENTER to replace." << endl;
+    string newName  = "";
+    getline ( cin, newName );
+    if (newName=="")
+    {
+        goto replaceFile;
+    } else {
+    FileOut = newName;
+    goto testExist;
+    }
+    }
+replaceFile:
     if ( !fileI ) {
         cerr << "Impossible to open " << FileIn << "!" << endl;
     } else {
@@ -195,8 +217,8 @@ void Rename ( string FileIn = "", string FileOut = "" ) {
         fileI.close();
     }
 
-//   return 0;
 }
+
 
 int copyStringBeginningFileOrBeforeTrigger ( string data = "", string FileIn = "", string FileOut = "", string trigger = "" ) { // Insert a string at the beginning of the file, or before a trigger. AS the names says: data first, file after.
     bool insertionDone = false;
@@ -233,7 +255,7 @@ int copyStringBeginningFileOrBeforeTrigger ( string data = "", string FileIn = "
 
 void insertStringBeginningFileOrBeforeTrigger ( string stringtoInsert, string fileToInsert, string trigger = "" ) {
     string tempFile = "main.bak"; // https://en.cppreference.com/w/cpp/io/c/tmpfile
-    Rename ( fileToInsert, tempFile );
+    copyFile ( fileToInsert, tempFile, OverwriteBakWihoutPrompt );
     copyStringBeginningFileOrBeforeTrigger ( stringtoInsert, tempFile, fileToInsert, trigger );
 }
 
@@ -255,18 +277,22 @@ void YouMustDo() { // Ok.
 }
 
 
-void updateCPB() {
+void updateCBP() {
 // quel fichier de quel dossier ?
 
-    cout << "You must check " << fileCPB <<"!"<< endl;
+    cout << "You must check " << fileCBP <<"!"<< endl;
+    if (doesFileExists(fileCBP)==false)
+    {
+        cerr << "ERR: no existence of " << fileCBP << endl;
+    }
     string trigger = "<Unit filename=\"main.cpp\" />";
     cout << "after \"<Unit filename=\"main.cpp\" />\", please check:" << endl;
-    cout << "<Unit filename=\"" << nameFile << "\".h\" />" << endl;
-    string stringtoInsert = "<Unit filename=\"" + nameFile + "\".h\" />";
-    insertStringBeginningFileOrBeforeTrigger ( stringtoInsert, fileCPB, trigger );
-    stringtoInsert = "<Unit filename=\"" + nameFile + ".c" + pp + " />";
+    cout << "<Unit filename=\"" << nameFile << ".h\" />" << endl;
+    string stringtoInsert = "<Unit filename=\"" + nameFile + ".h\" />";
+    insertStringBeginningFileOrBeforeTrigger ( stringtoInsert, fileCBP, trigger );
+    stringtoInsert = "<Unit filename=\"" + nameFile + ".c" + pp + "\" />";
     cout << "<Unit filename=\""<< nameFile << ".c" << pp << " />" << endl;
-    insertStringBeginningFileOrBeforeTrigger ( stringtoInsert, fileCPB, trigger );
+    insertStringBeginningFileOrBeforeTrigger ( stringtoInsert, fileCBP, trigger );
     /*
     		<Unit filename="main.cpp" />
     		<Unit filename="who.cpp" />
@@ -282,20 +308,24 @@ int main ( int argc, char* argv[] ) {
     if ( argc>1 ) {
 
         for ( int argument=0; argument<argc ; argument++ ) { // to test normal.
-            // cout << "argv[" << argument << "] = " << argv[argument] << endl; // Test ok.
+cout << "argv[" << argument << "] = " << argv[argument] << endl;
             string argu = argv[argument];
             int finArg = ( argu ).size() - 4 ;
-            string argTot = toUp ( argv[argument] );
+            string argTot = toUp ( argv[argument] ); // toup?
 
-            if ( argTot.substr ( finArg ) ==".CPB" ) {
-                fileCPB = argv[argument];
-                //     clog << "fileCPB: " << fileCPB << endl;
+            if ( argTot.substr ( finArg ) ==".CBP" ) {   // .cbp ?
+                fileCBP = argv[argument];
+                    clog << "fileCBP: " << fileCBP << endl;
             }
         }
 
     } else {
-        fileCPB = "XXX.cpb";
-        cerr << ".cpb not found, working with pseudo-file " << fileCPB << " instead." << endl;
+        fileCBP = "XXX.cbp";
+        cerr << ".cbp not found, working with pseudo-file " << fileCBP << " instead." << endl;
+    }
+if (doesFileExists(fileCBP)==false)
+    {
+        cerr << "ERR: no existence of " << fileCBP << endl;
     }
 
     // cout << "}" << endl; // End of tests.
@@ -323,6 +353,7 @@ int main ( int argc, char* argv[] ) {
         }
 
         monFlux << "*/" << endl;
+        // askFunction(); // ?
         monFlux << parametersDefValues << ";"<< endl << endl;
 // int add(int a_local_add = 0, int b_local_add = 0);
 // int diff(int a_local_diff = 0, int b_local_diff = 0);
@@ -361,8 +392,8 @@ int main ( int argc, char* argv[] ) {
         */
         monFlux2.close();
     }
-
-    updateCPB();
+       clog << "fileCBP: " << fileCBP << endl;
+    updateCBP();
     YouMustDo();
     getline ( cin, file ); // Enter to quit?
     return 0;

@@ -1,11 +1,10 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
 
 using namespace std;
 
-OverwriteBakWihoutPrompt = true; // INI file?
+bool OverwriteBakWihoutPrompt = false; // INI file?
 string mainF = "main"; // main0 for tests, main for real.
 string nameFile = "";
 string parameters = "";
@@ -58,6 +57,15 @@ bool doesFileExists ( const std::string& name ) { // https://stackoverflow.com/q
     }
 }
 
+string DelLeftSpacesTabs ( string In = "" ) { // Tests Ok.
+// "" ? // Tests ok, no need.
+    while ( ( In[0]==' ' ) || ( In[0]=='\t' ) ) {
+        In=In.substr ( 1 );
+    }
+
+    return In;
+}
+
 string deleteDefValues ( string parameters = "" ) { // Tests Ok.
     int parenthesis = 0;
     // Entrer dans une string est facilement détectable, mais pas sa sortie.
@@ -105,6 +113,7 @@ string deleteDefValues ( string parameters = "" ) { // Tests Ok.
 
 void intro() { // Tests Ok.
     cout << "   This program will help You to add a function with external files: a H file (header)..." << endl;
+    cout << "https://github.com/RedGuff/MakeHNewFunction" << endl;
 }
 void updateC_CPP() { // File detection. // Tests Ok.
     if ( doesFileExists ( mainF + ".c" ) == true ) {
@@ -115,19 +124,10 @@ void updateC_CPP() { // File detection. // Tests Ok.
         cout << "\"" << mainF << ".cpp\" found. Working on it." << endl;
     } else {
         cerr << "ERROR: Neither \"" << mainF << ".c\" nor \"" << mainF << ".cpp\" found!" << endl;
- cout << "ENTER to quit." << endl;
-       getline(cin,mainF);
+        cout << "ENTER to quit." << endl;
+        getline ( cin,mainF );
         exit ( EXIT_FAILURE );
     }
-}
-
-string DelLeftSpacesTabs ( string In = "" ) { // Tests Ok.
-// "" ? // Tests ok, no need.
-    while ( ( In[0]==' ' ) || ( In[0]=='\t' ) ) {
-        In=In.substr ( 1 );
-    }
-
-    return In;
 }
 
 void askFile() { //
@@ -141,18 +141,18 @@ void askFile() { //
     getline ( cin, nameFile );
     nameFile = DelLeftSpacesTabs ( nameFile );
     string nameFileCPP =  nameFile +".c" + pp;
-   // clog << "nameFileCPP: " << nameFileCPP << endl;
-  //  clog << "(doesFileExists(nameFileCPP): " << doesFileExists ( nameFileCPP ) << endl;
+    // clog << "nameFileCPP: " << nameFileCPP << endl;
+    //  clog << "(doesFileExists(nameFileCPP): " << doesFileExists ( nameFileCPP ) << endl;
     string nameFileH =  nameFile +".h";
-   // clog << "nameFileH: " << nameFileH << endl;
-  //  clog << "(doesFileExists(nameFileH): " << doesFileExists ( nameFileH ) << endl;
+    // clog << "nameFileH: " << nameFileH << endl;
+    //  clog << "(doesFileExists(nameFileH): " << doesFileExists ( nameFileH ) << endl;
 
     if ( ( doesFileExists ( nameFileCPP ) ) || ( doesFileExists ( nameFileH ) ) ) {
         fileHCPPExists = true;
         cerr << "\"" << nameFileCPP << "\" or/and \"" << nameFileH << "\" detected !" << endl;
         cout << "I can\'t work with existing files, today, but I hope that I may do it, one day." << endl;
         cout << "ENTER to quit." << endl;
-       getline(cin,mainF);
+        getline ( cin,mainF );
         exit ( EXIT_FAILURE );
 
     }
@@ -183,21 +183,23 @@ void askFunction() {
 void copyFile ( string FileIn = "", string FileOut = "", bool OverwriteWithoutPrompt = false ) {
     ifstream fileI ( FileIn.c_str(), ios::in ); // Read
 testExist:
-    if ((!OverwriteWithoutPrompt) && (doesFileExists(FileOut)==true))
-    {
+
+    if ( ( !OverwriteWithoutPrompt ) && ( doesFileExists ( FileOut ) ==true ) ) {
         cout << "The file \"" << FileOut << "\" exists!" << endl;
-    cout << "Try a new name, or ENTER to replace." << endl;
-    string newName  = "";
-    getline ( cin, newName );
-    if (newName=="")
-    {
-        goto replaceFile;
-    } else {
-    FileOut = newName;
-    goto testExist;
+        cout << "Try a new name, or ENTER to replace." << endl;
+        string newName  = "";
+        getline ( cin, newName );
+
+        if ( newName=="" ) {
+            goto replaceFile;
+        } else {
+            FileOut = newName;
+            goto testExist;
+        }
     }
-    }
+
 replaceFile:
+
     if ( !fileI ) {
         cerr << "Impossible to open " << FileIn << "!" << endl;
     } else {
@@ -218,7 +220,6 @@ replaceFile:
     }
 
 }
-
 
 int copyStringBeginningFileOrBeforeTrigger ( string data = "", string FileIn = "", string FileOut = "", string trigger = "" ) { // Insert a string at the beginning of the file, or before a trigger. AS the names says: data first, file after.
     bool insertionDone = false;
@@ -254,11 +255,10 @@ int copyStringBeginningFileOrBeforeTrigger ( string data = "", string FileIn = "
 }
 
 void insertStringBeginningFileOrBeforeTrigger ( string stringtoInsert, string fileToInsert, string trigger = "" ) {
-    string tempFile = "main.bak"; // https://en.cppreference.com/w/cpp/io/c/tmpfile
+    string tempFile = "main.bak"; // https://en.cppreference.com/w/cpp/io/c/tmpfile  // ?
     copyFile ( fileToInsert, tempFile, OverwriteBakWihoutPrompt );
     copyStringBeginningFileOrBeforeTrigger ( stringtoInsert, tempFile, fileToInsert, trigger );
 }
-
 
 void updateMain() {
     string stringtoInsert = "#include \"" + nameFile + ".h\"" + "\n";
@@ -276,15 +276,15 @@ void YouMustDo() { // Ok.
     cout << "Bye!" << endl;
 }
 
-
 void updateCBP() {
 // quel fichier de quel dossier ?
+    cout << "If the Code::Blocks project is not updated automatically, you must add the files: \""  << nameFile << ".h\" and "  << nameFile << ".c\" " << pp << "\"." << endl;
+    cout << " or you must check " << fileCBP <<"!"<< endl;
 
-    cout << "You must check " << fileCBP <<"!"<< endl;
-    if (doesFileExists(fileCBP)==false)
-    {
+    if ( doesFileExists ( fileCBP ) ==false ) {
         cerr << "ERR: no existence of " << fileCBP << endl;
     }
+
     string trigger = "<Unit filename=\"main.cpp\" />";
     cout << "after \"<Unit filename=\"main.cpp\" />\", please check:" << endl;
     cout << "<Unit filename=\"" << nameFile << ".h\" />" << endl;
@@ -301,21 +301,93 @@ void updateCBP() {
 
 }
 
+
+string absoluteFileToRelativeFile ( string fileA = "c:\alain\file.txt" ) {
+    string fileR = "";
+    int a = fileA.size();
+    clog << "a: " << a << endl;
+
+    while ( ( fileA[a]!='\\' ) && ( fileA[a]!='\/' ) && ( a>0 ) ) {
+        a--;
+    }
+
+    fileR = fileA.substr ( a );
+    return fileR;
+}
+
+string noSpace ( string input = "" ) { // Ok.
+    string result = "";
+
+    for ( unsigned int i = 0; i < input.length(); i++ ) {
+        if ( input[i] !=' ' ) {
+            result = result + input[i];
+        }
+    }
+        return result;
+    }
+
+
+void readINI() {
+    string INI = "MakeHNewFunction.cfg";
+ //   string INI = "MakeHNewFunction.ini";
+    OverwriteBakWihoutPrompt = true;
+    string language = "English.lgg"; // For futur usage only.
+    ifstream configuration ( INI.c_str(), ios::in );
+
+    if ( !configuration ) {
+        cerr << "Impossible to open the configuration file: \"" << INI << "\"." << endl;
+    } else {
+        string lineIni = "";
+
+        while ( getline ( configuration, lineIni ) ) {
+            lineIni=noSpace ( lineIni );
+
+            if ( lineIni == "OverwriteBakWihoutPrompt=true" ) // I know: it's lazy!.
+                {OverwriteBakWihoutPrompt = true;
+                clog << "T" << endl;
+            }
+
+            if ( lineIni == "OverwriteBakWihoutPrompt=false" )
+                {OverwriteBakWihoutPrompt = false;
+            clog << "F" << endl;
+            }
+
+
+        }
+
+        configuration.close();
+    }
+}
+
 int main ( int argc, char* argv[] ) {
+    readINI();
     //  cout << "TESTS:{" << endl;
     // cout << argc << endl;
 
     if ( argc>1 ) {
 
         for ( int argument=0; argument<argc ; argument++ ) { // to test normal.
-cout << "argv[" << argument << "] = " << argv[argument] << endl;
+            cout << "argv[" << argument << "] = " << argv[argument] << endl;
             string argu = argv[argument];
-            int finArg = ( argu ).size() - 4 ;
-            string argTot = toUp ( argv[argument] ); // toup?
+            clog << "argu: " << argu << endl;
 
-            if ( argTot.substr ( finArg ) ==".CBP" ) {   // .cbp ?
+            if ( doesFileExists ( argu ) ==true ) {
+                fileCBP = argu;
+                goto fileCBPOk;
+            }
+
+            int finArg = ( argu ).size() - 4 ;
+            clog << "finArg : " << finArg  << endl;
+            // string argTot = toUp ( argv[argument] ); // toup?
+            string argTot =  argv[argument] ; // toup?
+            clog << "argTot.substr ( finArg ): " << argTot.substr ( finArg ) << endl;
+
+            if ( argTot.substr ( finArg ) ==".cpb" ) {   // .cbp ?
                 fileCBP = argv[argument];
-                    clog << "fileCBP: " << fileCBP << endl;
+                clog << "fileCBP: " << fileCBP << endl;
+                clog << "doesFileExists(fileCBP): " << doesFileExists ( fileCBP ) << endl;
+                //      fileCBP = absoluteFileToRelativeFile(fileCBP);
+                clog << "doesFileExists(fileCBP): " << doesFileExists ( fileCBP ) << endl;
             }
         }
 
@@ -323,11 +395,16 @@ cout << "argv[" << argument << "] = " << argv[argument] << endl;
         fileCBP = "XXX.cbp";
         cerr << ".cbp not found, working with pseudo-file " << fileCBP << " instead." << endl;
     }
-if (doesFileExists(fileCBP)==false)
-    {
-        cerr << "ERR: no existence of " << fileCBP << endl;
+
+fileCBPOk:
+
+    if ( doesFileExists ( fileCBP ) ==false ) {
+        cerr << "ERRok: no existence of " << fileCBP << endl;
+        fileCBP = "Deletable.cbp";
+        cerr << "I\'ll use hard value instead:" << fileCBP << endl;
     }
 
+    clog << "doesFileExists(fileCBP)_354: " << doesFileExists ( fileCBP ) << endl;
     // cout << "}" << endl; // End of tests.
     intro();
     updateC_CPP();
@@ -392,7 +469,8 @@ if (doesFileExists(fileCBP)==false)
         */
         monFlux2.close();
     }
-       clog << "fileCBP: " << fileCBP << endl;
+
+    clog << "fileCBP: " << fileCBP << endl;
     updateCBP();
     YouMustDo();
     getline ( cin, file ); // Enter to quit?

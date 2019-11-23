@@ -1,10 +1,11 @@
+
 #include <iostream>
 #include <fstream>
 #include <string>
 
 using namespace std;
 
-bool OverwriteBakWihoutPrompt = false; // INI file?
+bool OverwriteBakWithoutPrompt = false;
 string mainF = "main"; // main0 for tests, main for real.
 string nameFile = "";
 string parameters = "";
@@ -256,7 +257,7 @@ int copyStringBeginningFileOrBeforeTrigger ( string data = "", string FileIn = "
 
 void insertStringBeginningFileOrBeforeTrigger ( string stringtoInsert, string fileToInsert, string trigger = "" ) {
     string tempFile = "main.bak"; // https://en.cppreference.com/w/cpp/io/c/tmpfile  // ?
-    copyFile ( fileToInsert, tempFile, OverwriteBakWihoutPrompt );
+    copyFile ( fileToInsert, tempFile, OverwriteBakWithoutPrompt );
     copyStringBeginningFileOrBeforeTrigger ( stringtoInsert, tempFile, fileToInsert, trigger );
 }
 
@@ -276,7 +277,7 @@ void YouMustDo() { // Ok.
     cout << "Bye!" << endl;
 }
 
-void updateCBP() {
+void completeCBP() {
 // quel fichier de quel dossier ?
     cout << "If the Code::Blocks project is not updated automatically, you must add the files: \""  << nameFile << ".h\" and "  << nameFile << ".c\" " << pp << "\"." << endl;
     cout << " or you must check " << fileCBP <<"!"<< endl;
@@ -330,7 +331,7 @@ string noSpace ( string input = "" ) { // Ok.
 void readINI() {
     string INI = "MakeHNewFunction.cfg";
  //   string INI = "MakeHNewFunction.ini";
-    OverwriteBakWihoutPrompt = true;
+    OverwriteBakWithoutPrompt = true;
     string language = "English.lgg"; // For futur usage only.
     ifstream configuration ( INI.c_str(), ios::in );
 
@@ -342,13 +343,13 @@ void readINI() {
         while ( getline ( configuration, lineIni ) ) {
             lineIni=noSpace ( lineIni );
 
-            if ( lineIni == "OverwriteBakWihoutPrompt=true" ) // I know: it's lazy!.
-                {OverwriteBakWihoutPrompt = true;
+            if ( lineIni.substr(0,29+1) == "OverwriteBakWithoutPrompt=true" ) // substr in order to have remarks after.
+                {OverwriteBakWithoutPrompt = true;
                 clog << "T" << endl;
             }
 
-            if ( lineIni == "OverwriteBakWihoutPrompt=false" )
-                {OverwriteBakWihoutPrompt = false;
+            if ( lineIni.substr(0,30+1) == "OverwriteBakWithoutPrompt=false" )
+                {OverwriteBakWithoutPrompt = false;
             clog << "F" << endl;
             }
 
@@ -471,7 +472,7 @@ fileCBPOk:
     }
 
     clog << "fileCBP: " << fileCBP << endl;
-    updateCBP();
+    completeCBP();
     YouMustDo();
     getline ( cin, file ); // Enter to quit?
     return 0;

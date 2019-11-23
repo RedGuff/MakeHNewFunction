@@ -345,12 +345,12 @@ void readINI() {
 
             if ( lineIni.substr(0,29+1) == "OverwriteBakWithoutPrompt=true" ) // substr in order to have remarks after.
                 {OverwriteBakWithoutPrompt = true;
-                clog << "T" << endl;
+                // clog << "T" << endl;
             }
 
             if ( lineIni.substr(0,30+1) == "OverwriteBakWithoutPrompt=false" )
                 {OverwriteBakWithoutPrompt = false;
-            clog << "F" << endl;
+// clog << "F" << endl;
             }
 
 
